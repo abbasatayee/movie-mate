@@ -1,0 +1,10 @@
+/.venv
+/venv
+/env
+.env
+/models
+/data
+/logs
+
+.DS_Store
+.idea
