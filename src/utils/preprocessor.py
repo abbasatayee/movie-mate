@@ -62,3 +62,5 @@ def create_index_mapping(L):
     #invert the map
     item_2_ind = {v: k for k, v in ind_2_item.items()}
     return ind_2_item,item_2_ind
+
+
