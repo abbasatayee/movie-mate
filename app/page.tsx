@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowRight, Star, Users, TrendingUp } from "lucide-react";
+import { ArrowRight, Star, Sparkles, Film, Zap, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
@@ -24,108 +24,160 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-lg text-white">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute top-40 right-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(220,38,38,0.1),transparent_50%)]" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <nav className="absolute top-0 left-0 right-0 z-10 container mx-auto px-4 py-6">
+      {/* Navigation */}
+      <nav className="relative z-20 container mx-auto px-4 lg:px-12 py-6">
         <div className="flex items-center justify-between">
           <Logo variant="homepage" size="md" href="/" />
-          <div className="flex items-center gap-4">
-            <Link href="/login" passHref legacyBehavior>
-              <a>
-                <Button className="bg-gradient-to-r cursor-pointer from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg transition-all duration-200">
-                  Get Started
-                </Button>
-              </a>
-            </Link>
-          </div>
+          <Link href="/login">
+            <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 shadow-lg transition-all duration-200">
+              Get Started
+            </Button>
+          </Link>
         </div>
       </nav>
 
-      <main className="relative z-10 container mx-auto px-4 py-20 flex-1 flex items-center justify-center">
-        <div className="max-w-5xl mx-auto text-center space-y-12">
-          <div className="space-y-6">
-            <h2 className="text-6xl md:text-7xl lg:text-8xl font-extrabold text-white leading-tight">
-              Discover Movies You'll
-              <span className="block bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 bg-clip-text text-transparent">
-                Love
-              </span>
-            </h2>
-            <p className="text-xl md:text-2xl text-purple-100 max-w-3xl mx-auto leading-relaxed">
-              Get personalized movie recommendations based on your taste. Save
-              your favorites and never run out of great movies to watch.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              size="lg"
-              className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg px-8 py-6 shadow-2xl transition-all duration-200 hover:scale-105"
-              asChild
-            >
-              <Link href="/login">
-                Start Watching
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-            <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mb-6 mx-auto shadow-lg">
-                <Star className="h-8 w-8 text-white fill-white" />
+      {/* Hero Section */}
+      <main className="relative z-10">
+        <div className="container mx-auto px-4 lg:px-12 pt-20 pb-32">
+          <div className="max-w-6xl mx-auto">
+            {/* Main Hero Content */}
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/30 mb-8">
+                <Sparkles className="h-4 w-4 text-red-400" />
+                <span className="text-sm font-medium text-red-400">AI-Powered Recommendations</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Curated Picks
-              </h3>
-              <p className="text-purple-100">
-                Handpicked recommendations based on ratings and reviews
+              
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-tight">
+                Discover Your Next
+                <span className="block bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent">
+                  Favorite Movie
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                Get personalized movie recommendations powered by advanced AI. 
+                Find films you'll love based on your unique taste and preferences.
               </p>
+
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <Button
+                  size="lg"
+                  className="bg-red-600 hover:bg-red-700 text-white text-lg px-10 py-7 font-bold shadow-xl hover:shadow-red-500/50 transition-all duration-200 hover:scale-105"
+                  asChild
+                >
+                  <Link href="/login">
+                    <Play className="mr-2 h-5 w-5" />
+                    Start Watching
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-gray-700 text-white hover:bg-gray-900 text-lg px-10 py-7 font-semibold transition-all duration-200 hover:scale-105"
+                  asChild
+                >
+                  <Link href="/login">
+                    Learn More
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
             </div>
 
-            <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center mb-6 mx-auto shadow-lg">
-                <Users className="h-8 w-8 text-white" />
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+              <div className="group p-8 rounded-2xl bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-red-600/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Star className="h-7 w-7 text-white fill-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  Top Rated
+                </h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Discover highly-rated movies that match your preferences and are likely to become your favorites.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Personalized
-              </h3>
-              <p className="text-purple-100">
-                Movies tailored to your unique preferences and tastes
-              </p>
+
+              <div className="group p-8 rounded-2xl bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-red-600/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Zap className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  Personalized
+                </h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Advanced recommendation algorithms tailor suggestions specifically to your viewing history and taste.
+                </p>
+              </div>
+
+              <div className="group p-8 rounded-2xl bg-gray-900/50 backdrop-blur-sm border border-gray-800 hover:border-red-600/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Film className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  Curated Collection
+                </h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Explore a carefully curated selection of movies organized by genre, rating, and your preferences.
+                </p>
+              </div>
             </div>
 
-            <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center mb-6 mx-auto shadow-lg">
-                <TrendingUp className="h-8 w-8 text-white" />
+            {/* Stats Section */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
+              <div className="text-center p-6 rounded-xl bg-gray-900/30 border border-gray-800">
+                <div className="text-4xl font-black text-red-600 mb-2">30+</div>
+                <div className="text-sm text-gray-400">Recommendations</div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Trending Now
-              </h3>
-              <p className="text-purple-100">
-                Stay updated with the latest and most popular movies
-              </p>
+              <div className="text-center p-6 rounded-xl bg-gray-900/30 border border-gray-800">
+                <div className="text-4xl font-black text-red-600 mb-2">AI</div>
+                <div className="text-sm text-gray-400">Powered</div>
+              </div>
+              <div className="text-center p-6 rounded-xl bg-gray-900/30 border border-gray-800">
+                <div className="text-4xl font-black text-red-600 mb-2">100%</div>
+                <div className="text-sm text-gray-400">Personalized</div>
+              </div>
+              <div className="text-center p-6 rounded-xl bg-gray-900/30 border border-gray-800">
+                <div className="text-4xl font-black text-red-600 mb-2">∞</div>
+                <div className="text-sm text-gray-400">Discoveries</div>
+              </div>
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="relative z-10 container mx-auto px-4 py-8 mt-auto">
-        <p className="text-center text-purple-200">
-          © {new Date().getFullYear()} MovieMate. All rights reserved.
-        </p>
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-gray-800 bg-black/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4 lg:px-12 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} MovieMate. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link href="/login" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Sign In
+              </Link>
+              <Link href="/login" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
