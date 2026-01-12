@@ -13,8 +13,12 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
-      router.push("/dashboard");
+    if (!isLoading) {
+      // Check localStorage directly for immediate redirect
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        router.push("/dashboard");
+      }
     }
   }, [user, isLoading, router]);
 
@@ -41,17 +45,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <Link href="/login" passHref legacyBehavior>
               <a>
-                <Button
-                  variant="ghost"
-                  className="text-white hover:bg-white/10 cursor-pointer"
-                >
-                  Sign in
-                </Button>
-              </a>
-            </Link>
-            <Link href="/signup" passHref legacyBehavior>
-              <a>
-                <Button className="bg-gradient-to-r cursor-pointer from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg">
+                <Button className="bg-gradient-to-r cursor-pointer from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg transition-all duration-200">
                   Get Started
                 </Button>
               </a>
@@ -78,21 +72,13 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4">
             <Button
               size="lg"
-              className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg px-8 py-6 shadow-2xl"
+              className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg px-8 py-6 shadow-2xl transition-all duration-200 hover:scale-105"
               asChild
             >
-              <Link href="/signup">
+              <Link href="/login">
                 Start Watching
                 <ArrowRight className="h-5 w-5" />
               </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-gray border-white/30 hover:bg-white/10 text-lg px-8 py-6"
-              asChild
-            >
-              <Link href="/login">Sign In</Link>
             </Button>
           </div>
 

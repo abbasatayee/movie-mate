@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { fetchRecommendations, type Recommendation } from "@/lib/api";
 import { MovieCardSkeleton } from "@/components/MovieCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MovieDetailsDialog } from "@/components/MovieDetailsDialog";
 
 export default function DashboardPage() {
   const { user, logout, isLoading } = useAuth();
@@ -41,6 +42,11 @@ export default function DashboardPage() {
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<{
+    movie: Recommendation['movie'];
+    score: number;
+  } | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -53,7 +59,7 @@ export default function DashboardPage() {
       const userId = user.userId || user.id;
       setIsLoadingRecommendations(true);
       setError(null);
-      fetchRecommendations(userId, 20)
+      fetchRecommendations(userId, 30)
         .then((data) => {
           setRecommendations(data.recommendations);
           setFilteredMovies(data.recommendations);
@@ -109,32 +115,60 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center">
-          <p className="text-red-500 text-lg mb-4">{error}</p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            Retry
-          </Button>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Oops!</h2>
+            <p className="text-red-400 text-lg mb-6">{error}</p>
+          </div>
+          <div className="flex gap-4 justify-center">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700 text-white px-6"
+            >
+              Retry
+            </Button>
+            <Button
+              onClick={() => router.push("/login")}
+              variant="outline"
+              className="border-gray-600 text-white hover:bg-gray-800 px-6"
+            >
+              Back to Login
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   // Group movies by genre for Netflix-style rows
+  // Each movie is assigned to only its first genre to avoid duplicates
   const moviesByGenre =
     recommendations.length > 0
       ? recommendations.reduce((acc, rec) => {
           const genres =
             rec.movie.genres.length > 0 ? rec.movie.genres : ["Other"];
-          genres.forEach((genre) => {
-            if (!acc[genre]) {
-              acc[genre] = [];
-            }
-            acc[genre].push(rec);
-          });
-          return acc;
+          // Use only the first genre to avoid duplicates
+          const primaryGenre = genres[0];
+          if (!acc[primaryGenre]) {
+            acc[primaryGenre] = [];
+          }
+          acc[primaryGenre].push(rec);
+    return acc;
         }, {} as Record<string, Recommendation[]>)
       : {};
 
@@ -183,6 +217,11 @@ export default function DashboardPage() {
                   score={rec.score}
                   poster_url={rec.movie.poster_url}
                   movie_id={rec.movie.movie_id}
+                  movie={rec.movie}
+                  onCardClick={() => {
+                    setSelectedMovie({ movie: rec.movie, score: rec.score });
+                    setIsDialogOpen(true);
+                  }}
                 />
               </div>
             ))}
@@ -190,15 +229,17 @@ export default function DashboardPage() {
           {/* Scroll Buttons */}
           <button
             onClick={() => rowRef.current && scroll("left", rowRef.current)}
-            className="absolute left-0 top-0 bottom-2 w-20 bg-gradient-to-r from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-start pl-4 z-10 hover:bg-gradient-to-r hover:from-black hover:via-black/90"
+            className="absolute left-0 top-0 bottom-2 w-20 bg-gradient-to-r from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-start pl-4 z-10 hover:bg-gradient-to-r hover:from-black hover:via-black/90 cursor-pointer"
+            aria-label="Scroll left"
           >
-            <ChevronLeft className="h-10 w-10 text-white drop-shadow-lg" />
+            <ChevronLeft className="h-10 w-10 text-white drop-shadow-lg hover:scale-110 transition-transform" />
           </button>
           <button
             onClick={() => rowRef.current && scroll("right", rowRef.current)}
-            className="absolute right-0 top-0 bottom-2 w-20 bg-gradient-to-l from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-end pr-4 z-10 hover:bg-gradient-to-l hover:from-black hover:via-black/90"
+            className="absolute right-0 top-0 bottom-2 w-20 bg-gradient-to-l from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-end pr-4 z-10 hover:bg-gradient-to-l hover:from-black hover:via-black/90 cursor-pointer"
+            aria-label="Scroll right"
           >
-            <ChevronRight className="h-10 w-10 text-white drop-shadow-lg" />
+            <ChevronRight className="h-10 w-10 text-white drop-shadow-lg hover:scale-110 transition-transform" />
           </button>
         </div>
       </div>
@@ -207,11 +248,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Netflix-style Header */}
+      {/* Enhanced Header */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-black shadow-lg"
+            ? "bg-black/95 backdrop-blur-md shadow-xl border-b border-gray-800/50"
             : "bg-gradient-to-b from-black via-black/80 to-transparent"
         }`}
       >
@@ -222,37 +263,25 @@ export default function DashboardPage() {
                 variant="dashboard"
                 size="md"
                 href="/dashboard"
-                className="cursor-pointer"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
               />
-              <nav className="hidden lg:flex items-center gap-6">
+              <nav className="hidden lg:flex items-center gap-2">
                 <Link
                   href="/dashboard"
-                  className="text-white font-medium hover:text-gray-200 transition-colors"
+                  className="px-4 py-2 text-white font-medium hover:text-red-400 transition-colors rounded-md hover:bg-white/5"
                 >
-                  Home
+                  Recommendations
                 </Link>
-                <button className="text-gray-300 hover:text-white transition-colors cursor-pointer">
-                  TV Shows
-                </button>
-                <button className="text-gray-300 hover:text-white transition-colors cursor-pointer">
-                  Movies
-                </button>
-                <button className="text-gray-300 hover:text-white transition-colors cursor-pointer">
-                  New & Popular
-                </button>
-                <button className="text-gray-300 hover:text-white transition-colors cursor-pointer">
-                  My List
-                </button>
               </nav>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
                 <Input
                   type="text"
-                  placeholder="Titles, people, genres"
-                  className="pl-10 bg-black/70 border-gray-600 text-white placeholder:text-gray-400 focus:border-white focus:bg-black/90 w-64 transition-all"
+                  placeholder="Search movies..."
+                  className="pl-10 pr-4 bg-black/70 border-gray-700 text-white placeholder:text-gray-500 focus:border-red-600 focus:bg-black/90 w-64 transition-all duration-200 rounded-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -261,10 +290,10 @@ export default function DashboardPage() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-10 w-10 rounded-md border-2 border-red-600 hover:border-red-500 transition-colors p-0"
+                    className="relative h-10 w-10 rounded-full border-2 border-red-600 hover:border-red-500 hover:bg-red-600/10 transition-all duration-200 p-0 ring-2 ring-transparent hover:ring-red-600/30"
                   >
                     <Avatar className="h-full w-full">
-                      <AvatarFallback className="bg-red-600 text-white font-semibold">
+                      <AvatarFallback className="bg-gradient-to-br from-red-600 to-red-700 text-white font-bold text-sm shadow-lg">
                         {user?.userId ? user.userId.toString().charAt(0) : "U"}
                       </AvatarFallback>
                     </Avatar>
@@ -272,11 +301,12 @@ export default function DashboardPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 bg-gray-900 border-gray-800"
+                  className="w-56 bg-gray-900/95 backdrop-blur-md border-gray-800 shadow-xl"
                 >
                   <DropdownMenuLabel className="text-white">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">
+                      <p className="text-xs text-gray-400 font-normal">Signed in as</p>
+                      <p className="text-sm font-semibold">
                         User ID: {user?.userId || "N/A"}
                       </p>
                     </div>
@@ -284,7 +314,7 @@ export default function DashboardPage() {
                   <DropdownMenuSeparator className="bg-gray-800" />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-white hover:bg-gray-800 cursor-pointer"
+                    className="text-white hover:bg-red-600/20 hover:text-red-400 cursor-pointer focus:bg-red-600/20 focus:text-red-400 transition-colors"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
@@ -318,66 +348,66 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : featuredMovie ? (
-          <div className="relative h-[85vh] min-h-[700px] flex items-end overflow-hidden">
-            <div
-              className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[20s] ease-out"
-              style={{
+        <div className="relative h-[85vh] min-h-[700px] flex items-end overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[20s] ease-out"
+            style={{
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.2) 100%), url(${
                   featuredMovie.movie.backdrop_url ||
                   featuredMovie.movie.poster_url ||
                   ""
                 })`,
-              }}
-            />
-            {/* Additional gradient overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/40" />
+            }}
+          />
+          {/* Additional gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/40" />
 
-            <div className="relative z-10 container mx-auto px-4 lg:px-12 pb-20 w-full">
-              <div className="max-w-3xl">
-                <h1 className="text-6xl md:text-8xl font-black mb-6 drop-shadow-2xl leading-tight tracking-tight">
+          <div className="relative z-10 container mx-auto px-4 lg:px-12 pb-20 w-full">
+            <div className="max-w-3xl">
+              <h1 className="text-6xl md:text-8xl font-black mb-6 drop-shadow-2xl leading-tight tracking-tight">
                   {featuredMovie.movie.title}
-                </h1>
+              </h1>
                 <div className="flex items-center gap-6 mb-8 flex-wrap">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-lg font-bold text-white">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-lg font-bold text-white">
                       {featuredMovie.score.toFixed(1)}
-                    </span>
-                  </div>
-                  {featuredMovie.movie.genres.map((genre) => (
-                    <Badge
-                      key={genre}
-                      variant="secondary"
-                      className="bg-white/20 text-white border-0 backdrop-blur-sm px-4 py-2 text-sm font-semibold"
-                    >
-                      {genre}
-                    </Badge>
-                  ))}
+                  </span>
                 </div>
-                <p className="text-xl md:text-2xl text-gray-100 mb-10 leading-relaxed max-w-2xl">
+                  {featuredMovie.movie.genres.map((genre) => (
+                <Badge
+                      key={genre}
+                  variant="secondary"
+                  className="bg-white/20 text-white border-0 backdrop-blur-sm px-4 py-2 text-sm font-semibold"
+                >
+                      {genre}
+                </Badge>
+                  ))}
+              </div>
+              <p className="text-xl md:text-2xl text-gray-100 mb-10 leading-relaxed max-w-2xl">
                   Experience the ultimate cinematic journey with this
                   recommended movie. A story that will captivate you from start
                   to finish.
-                </p>
-                <div className="flex items-center gap-4">
-                  <Button
-                    size="lg"
-                    className="bg-white text-black hover:bg-gray-200 text-lg px-10 py-7 gap-3 font-semibold rounded-md shadow-2xl hover:scale-105 transition-transform"
-                  >
-                    <Play className="h-7 w-7 fill-black" />
-                    Play
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="bg-black/40 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 text-lg px-10 py-7 font-semibold rounded-md hover:scale-105 transition-transform"
-                  >
-                    More Info
-                  </Button>
-                </div>
+              </p>
+              <div className="flex items-center gap-4">
+                <Button
+                  size="lg"
+                  className="bg-white text-black hover:bg-gray-200 text-lg px-10 py-7 gap-3 font-semibold rounded-md shadow-2xl hover:scale-105 transition-transform"
+                >
+                  <Play className="h-7 w-7 fill-black" />
+                  Play
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-black/40 backdrop-blur-sm text-white border-white/40 hover:bg-white/20 text-lg px-10 py-7 font-semibold rounded-md hover:scale-105 transition-transform"
+                >
+                  More Info
+                </Button>
               </div>
             </div>
           </div>
+        </div>
         ) : null}
 
         {/* Movie Rows */}
@@ -430,6 +460,11 @@ export default function DashboardPage() {
                       score={rec.score}
                       poster_url={rec.movie.poster_url}
                       movie_id={rec.movie.movie_id}
+                      movie={rec.movie}
+                      onCardClick={() => {
+                        setSelectedMovie({ movie: rec.movie, score: rec.score });
+                        setIsDialogOpen(true);
+                      }}
                     />
                   ))}
                 </div>
@@ -444,6 +479,14 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Movie Details Dialog */}
+      <MovieDetailsDialog
+        movie={selectedMovie?.movie || null}
+        score={selectedMovie?.score}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 }

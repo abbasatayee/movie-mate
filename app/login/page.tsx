@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,8 +22,15 @@ export default function LoginPage() {
   const [userId, setUserId] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,14 +60,22 @@ export default function LoginPage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-pulse text-white">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center mb-10">
           <Logo variant="auth" size="lg" href="/" />
         </div>
 
-        <Card className="shadow-2xl border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+        <Card className="shadow-2xl border-gray-800 bg-gray-900/95 backdrop-blur-sm border-2">
           <CardHeader className="space-y-2 pb-6">
             <CardTitle className="text-3xl font-bold text-white">
               Sign In
@@ -103,21 +117,11 @@ export default function LoginPage() {
             <CardFooter className="flex flex-col space-y-4 pt-6">
               <Button
                 type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-lg"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-lg transition-all duration-200 shadow-lg hover:shadow-red-500/50"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
-
-              <p className="text-sm text-center text-gray-300">
-                Don't have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="font-semibold text-red-500 hover:text-red-400 hover:underline transition-colors"
-                >
-                  Sign up
-                </Link>
-              </p>
             </CardFooter>
           </form>
         </Card>

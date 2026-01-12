@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreVertical } from 'lucide-react';
+import { type Movie } from '@/lib/api';
 
 interface MovieCardProps {
   id?: string;
@@ -14,6 +15,8 @@ interface MovieCardProps {
   posterUrl?: string;
   poster_url?: string | null;
   movie_id?: number;
+  movie?: Movie;
+  onCardClick?: () => void;
 }
 
 export function MovieCard({ 
@@ -25,7 +28,9 @@ export function MovieCard({
   score,
   posterUrl, 
   poster_url,
-  movie_id 
+  movie_id,
+  movie,
+  onCardClick
 }: MovieCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -51,13 +56,16 @@ export function MovieCard({
   const displayId = id || (movie_id ? movie_id.toString() : '');
 
   return (
-    <div className="group w-full cursor-pointer">
+    <div 
+      className="group w-full cursor-pointer transform transition-all duration-200 hover:scale-[1.02]"
+      onClick={onCardClick}
+    >
       {/* Thumbnail - YouTube style 16:9 */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-800 mb-3">
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-800 mb-3 shadow-lg group-hover:shadow-xl transition-shadow duration-200">
         <img
           src={displayPoster}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x600?text=No+Poster';
           }}
@@ -118,6 +126,9 @@ export function MovieCard({
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
             }}
           >
             <MoreVertical className="h-5 w-5 text-gray-300 hover:text-white" />
