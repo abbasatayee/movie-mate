@@ -27,10 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { fetchRecommendations, type Recommendation } from "@/lib/api";
+import { fetchRecommendations, fetchTopRatedMovie, type Recommendation, type Movie } from "@/lib/api";
 import { MovieCardSkeleton } from "@/components/MovieCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MovieDetailsDialog } from "@/components/MovieDetailsDialog";
+import { TopRatedMovieCard } from "@/components/TopRatedMovieCard";
 
 export default function DashboardPage() {
   const { user, logout, isLoading } = useAuth();
@@ -47,6 +48,8 @@ export default function DashboardPage() {
     score: number;
   } | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [topRatedMovie, setTopRatedMovie] = useState<Movie | null>(null);
+  const [isLoadingTopRated, setIsLoadingTopRated] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -59,6 +62,8 @@ export default function DashboardPage() {
       const userId = user.userId || user.id;
       setIsLoadingRecommendations(true);
       setError(null);
+      
+      // Fetch recommendations
       fetchRecommendations(userId, 30)
         .then((data) => {
           setRecommendations(data.recommendations);
@@ -70,6 +75,20 @@ export default function DashboardPage() {
         })
         .finally(() => {
           setIsLoadingRecommendations(false);
+        });
+
+      // Fetch top-rated movie
+      setIsLoadingTopRated(true);
+      fetchTopRatedMovie(userId)
+        .then((data) => {
+          setTopRatedMovie(data.movie);
+        })
+        .catch((err) => {
+          console.error("Error fetching top-rated movie:", err);
+          // Don't show error for top-rated, just log it
+        })
+        .finally(() => {
+          setIsLoadingTopRated(false);
         });
     }
   }, [user]);
@@ -409,6 +428,60 @@ export default function DashboardPage() {
           </div>
         </div>
         ) : null}
+
+        {/* Top Rated Movie Section */}
+        {!isLoadingRecommendations && !searchQuery && (
+          <div className="relative -mt-40 z-20 pb-12">
+            <div className="container mx-auto px-4 lg:px-12">
+              {isLoadingTopRated ? (
+                <div className="mb-12">
+                  <div className="relative w-full rounded-xl overflow-hidden bg-gradient-to-br from-gray-900 to-black border border-gray-800">
+                    {/* Backdrop skeleton */}
+                    <div className="absolute inset-0 bg-gray-800/50" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+                    
+                    <div className="relative z-10 p-8 md:p-12">
+                      <div className="max-w-4xl space-y-6">
+                        {/* Badge skeleton */}
+                        <Skeleton className="h-7 w-40 bg-gray-700 rounded-full" />
+                        
+                        {/* Title skeleton */}
+                        <div className="space-y-3">
+                          <Skeleton className="h-12 w-3/4 bg-gray-700 rounded" />
+                          <Skeleton className="h-12 w-2/3 bg-gray-700 rounded" />
+                        </div>
+                        
+                        {/* Genres skeleton */}
+                        <div className="flex flex-wrap gap-2">
+                          <Skeleton className="h-6 w-20 bg-gray-700 rounded-full" />
+                          <Skeleton className="h-6 w-24 bg-gray-700 rounded-full" />
+                          <Skeleton className="h-6 w-28 bg-gray-700 rounded-full" />
+                        </div>
+                        
+                        {/* Description skeleton */}
+                        <div className="space-y-2 max-w-2xl">
+                          <Skeleton className="h-5 w-full bg-gray-700 rounded" />
+                          <Skeleton className="h-5 w-full bg-gray-700 rounded" />
+                          <Skeleton className="h-5 w-4/5 bg-gray-700 rounded" />
+                        </div>
+                        
+                        {/* Buttons skeleton */}
+                        <div className="flex flex-wrap gap-3 pt-4">
+                          <Skeleton className="h-12 w-40 bg-gray-700 rounded-md" />
+                          <Skeleton className="h-12 w-36 bg-gray-700 rounded-md" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : topRatedMovie ? (
+                <div className="mb-12">
+                  <TopRatedMovieCard movie={topRatedMovie} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         {/* Movie Rows */}
         <div className="relative -mt-40 z-20 pb-20">
